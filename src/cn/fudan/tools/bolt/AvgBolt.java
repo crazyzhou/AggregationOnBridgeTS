@@ -71,6 +71,7 @@ public class AvgBolt implements IRichBolt
 								.entrySet())
 						{
 							startSeconds = entry2.getKey();
+							//System.out.println(startSeconds);
 							break;
 						}
 						if (null == startSeconds)

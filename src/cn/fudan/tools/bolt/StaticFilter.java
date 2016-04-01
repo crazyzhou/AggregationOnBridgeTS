@@ -28,9 +28,10 @@ public class StaticFilter implements IRichBolt
 		String ChannelCode = tuple.getStringByField("channelCode");
 		long timeStamp = tuple.getLongByField("timeStamp");
 		float value = tuple.getFloatByField("value");
-		System.out.println(ChannelCode);
+		//System.out.println(ChannelCode + '\t' + timeStamp);
 		if (map.containsKey(ChannelCode))
 		{
+			//System.out.println(ChannelCode + '\t' + timeStamp);
 			_collector.emit(new Values(ChannelCode, timeStamp, value));
 		}
 	}

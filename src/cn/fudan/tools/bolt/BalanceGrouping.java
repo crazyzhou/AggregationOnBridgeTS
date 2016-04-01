@@ -1,4 +1,4 @@
-package cn.fudan.tools.bolt;
+/*package cn.fudan.tools.bolt;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -53,3 +53,4 @@ public class BalanceGrouping implements CustomStreamGrouping, Serializable{
     }
 
 }
+*/
