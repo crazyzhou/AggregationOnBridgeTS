@@ -7,10 +7,10 @@ public class PairedWindow {
 	private long leftSize;
 	private long rightSize;
 	
-	public PairedWindow(String channel, long windowSize, long moveSize) {
-		this.channel = channel;
-		this.windowSize = windowSize;
-		this.moveSize = moveSize;
+	public PairedWindow(ChannelWindow channelWindow) {
+		this.channel = channelWindow.getChannel();
+		this.windowSize = channelWindow.getWindowSize();
+		this.moveSize = channelWindow.getMoveSize();
 		this.leftSize = windowSize % moveSize;
 		this.rightSize = moveSize - this.leftSize;
 	}
