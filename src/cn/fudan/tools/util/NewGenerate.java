@@ -7,12 +7,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.jdbc.core.ResultSetExtractor;
+
 import bsh.Interpreter;
 import cn.fudan.domain.GetQueryMap;
 import cn.fudan.tools.util.StringHelp;
 
 public class NewGenerate
 {
+	public static Set<String> result;
+	public static GetQueryMap getQueryMap;
+	
 	public static void main(String[] args) throws Exception
 	{
 		NewGenerate.generate("out_MD471Z=avg(\"5AB001-DY\",5000,1000);\n" +
@@ -34,6 +39,18 @@ public class NewGenerate
 	
 	public static void generate(String expression) throws Exception
 	{
+		result = new HashSet<>();
+		getQueryMap = new GetQueryMap();
+		String[] ss = expression.split(";");
+		for (int i = 0; i < ss.length; i++)
+		{
+			String[] s1 = ss[i].split("=");
+			if (s1.length == 2 && s1[0].trim().contains("out"))
+			{
+				result.add(s1[0].trim());
+			}
+		}
+		
 		StringBuilder sb = new StringBuilder();
 		Interpreter interpreter = new Interpreter();
 		Method[] methods = getAllStatMethods();
@@ -91,28 +108,28 @@ public class NewGenerate
 	public static int avg(String channel, long windowSize, long moveSize)
 			throws Exception
 	{
-		GetQueryMap.AddOneQuery(channel, windowSize, moveSize, "avg");
+		getQueryMap.AddOneQuery(channel, windowSize, moveSize, "avg");
 		return 0;
 	}
 
 	public static int max(String channel, long windowSize, long moveSize)
 			throws Exception
 	{
-		GetQueryMap.AddOneQuery(channel, windowSize, moveSize, "max");
+		getQueryMap.AddOneQuery(channel, windowSize, moveSize, "max");
 		return 0;
 	}
 
 	public static int min(String channel, long windowSize, long moveSize)
 			throws Exception
 	{
-		GetQueryMap.AddOneQuery(channel, windowSize, moveSize, "min");
+		getQueryMap.AddOneQuery(channel, windowSize, moveSize, "min");
 		return 0;
 	}
 	
 	public static int sum(String channel, long windowSize, long moveSize)
 			throws Exception
 	{
-		GetQueryMap.AddOneQuery(channel, windowSize, moveSize, "sum");
+		getQueryMap.AddOneQuery(channel, windowSize, moveSize, "sum");
 		return 0;
 	}
 }

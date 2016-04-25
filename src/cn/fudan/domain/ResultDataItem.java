@@ -15,7 +15,7 @@ public class ResultDataItem
 		this.windowSize = windowSize;
 		this.moveSize = moveSize;
 	}
-
+	
 	public String getFunctionName()
 	{
 		return functionName;

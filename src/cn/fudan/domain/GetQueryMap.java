@@ -18,23 +18,23 @@ public class GetQueryMap {
 		firstTimestamp = 0;
 	}
 	
-	public static long getFirstTimestamp() {
+	public long getFirstTimestamp() {
 		return firstTimestamp;
 	}
 	
-	public static void setFirstTimestamp(long firstTimestamp) {
+	public void setFirstTimestamp(long firstTimestamp) {
 		GetQueryMap.firstTimestamp = firstTimestamp;
 	}
 	
-	public static Map<String, Set<ChannelWindow>> getWindowMap() {
+	public Map<String, Set<ChannelWindow>> getWindowMap() {
 		return windowMap;
 	}
 	
-	public static Map<ChannelWindow, Set<String>> getFunctionMap() {
+	public Map<ChannelWindow, Set<String>> getFunctionMap() {
 		return functionMap;
 	}
 	
-	public static void AddOneQuery(String channelCode, long windowSize, long moveSize, String functionName)
+	public void AddOneQuery(String channelCode, long windowSize, long moveSize, String functionName)
 	{
 		ChannelWindow channelWindow = new ChannelWindow(channelCode, windowSize, moveSize);
 		if (windowMap.containsKey(channelCode))
@@ -47,6 +47,7 @@ public class GetQueryMap {
 			windowSet.add(channelWindow);
 			windowMap.put(channelCode, windowSet);
 		}
+		
 		if (functionMap.containsKey(channelWindow))
 		{
 			functionMap.get(channelWindow).add(functionName);
@@ -56,6 +57,6 @@ public class GetQueryMap {
 			Set<String> functionSet = new HashSet<>();
 			functionSet.add(functionName);
 			functionMap.put(channelWindow, functionSet);
-		}		
+		}
 	}
 }

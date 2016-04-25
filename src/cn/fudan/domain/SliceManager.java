@@ -20,21 +20,16 @@ public class SliceManager {
 	
 	public long advanceWindowGetNextEdge() {
 		Edge curEdge;
+		System.out.println(H.size());
 		long curTime = H.peek().getCurrentTime();
 		while (curTime == H.peek().getCurrentTime()) {
 			curEdge = H.remove();
-			
-			//not sure
-			for (Edge edge : H) {
-				if (edge.getPairedWindows().equals(curEdge.getPairedWindows())) {
-					H.remove(edge);
-				}
-			}
 			
 			if (curEdge.isLast()) {
 				addEdges(curEdge.getCurrentTime(), curEdge.getPairedWindows());
 			}
 		}
+		System.out.println(curTime);
 		return curTime;
 	}
 	

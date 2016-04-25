@@ -11,11 +11,13 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import cn.fudan.domain.GetQueryMap;
+import cn.fudan.tools.util.NewGenerate;
 
 public class FilterBolt implements IRichBolt{
 	OutputCollector _collector;
 	Set<String> channelSet;
 	boolean isFirst;
+	GetQueryMap getQueryMap;
 
 	@Override
 	public void cleanup()
@@ -31,9 +33,12 @@ public class FilterBolt implements IRichBolt{
 		//System.out.println(ChannelCode + '\t' + timeStamp);
 		if (channelSet.contains(ChannelCode))
 		{
-			if (isFirst)
-				GetQueryMap.setFirstTimestamp(timeStamp);
-			//System.out.println(ChannelCode + '\t' + timeStamp);
+			if (isFirst) {
+				System.out.println("I'm in it");
+				getQueryMap.setFirstTimestamp(timeStamp);
+				System.out.println(ChannelCode + '\t' + timeStamp);
+				isFirst = false;
+			}
 			_collector.emit(new Values(ChannelCode, timeStamp, value));
 		}
 	}
@@ -49,8 +54,9 @@ public class FilterBolt implements IRichBolt{
 			OutputCollector collector)
 	{
 		this._collector = collector;
+		getQueryMap = NewGenerate.getQueryMap;
 		isFirst = true;
-		channelSet = GetQueryMap.getWindowMap().keySet();
+		channelSet = getQueryMap.getWindowMap().keySet();
 	}
 
 	@Override
