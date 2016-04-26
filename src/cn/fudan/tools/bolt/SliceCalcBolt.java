@@ -31,35 +31,40 @@ public class SliceCalcBolt implements IRichBolt {
 	Map<String, Set<ChannelWindow>> windowMap;
 	Map<String, SliceManager> sliceManagers;
 	Map<String, AvgDataItem> sliceDataMap;
+	GetQueryMap getQueryMap;
+	boolean isFirst;
+	
 	
 	@Override
 	public void prepare(Map arg0, TopologyContext arg1, OutputCollector collector) {
 		this._collector = collector;
-		GetQueryMap getQueryMap = NewGenerate.getQueryMap;
+		isFirst = true;
+		getQueryMap = NewGenerate.getQueryMap;
 		windowMap = getQueryMap.getWindowMap();
 		sliceManagers = new HashMap<>();
 		sliceDataMap = new HashMap<>();
-		for (String channelCode : windowMap.keySet())
-		{
-			List<PairedWindow> pairedWindows = new ArrayList<>();
-			for (ChannelWindow window : windowMap.get(channelCode))
-			{
-				PairedWindow pairedWindow = new PairedWindow(window);
-				pairedWindows.add(pairedWindow);
-			}
-			System.out.println("shit" + getQueryMap.getFirstTimestamp());
-			sliceManagers.put(channelCode, new SliceManager(pairedWindows, getQueryMap.getFirstTimestamp()));
-		}	
 	}
 	
 	@Override
 	public void execute(Tuple tuple) {
+		if (isFirst) {
+			for (String channelCode : windowMap.keySet())
+			{
+				List<PairedWindow> pairedWindows = new ArrayList<>();
+				for (ChannelWindow window : windowMap.get(channelCode))
+				{
+					PairedWindow pairedWindow = new PairedWindow(window);
+					pairedWindows.add(pairedWindow);
+				}
+				sliceManagers.put(channelCode, new SliceManager(pairedWindows, getQueryMap.getFirstTimestamp()));
+			}
+			isFirst = false;
+		}
 		String channelCode = tuple.getStringByField("channelCode");
 		long timeStamp = tuple.getLongByField("timeStamp");
 		float value = tuple.getFloatByField("value");
-		System.out.println(sliceManagers.get(channelCode));
 		long edgeTimeStamp = sliceManagers.get(channelCode).advanceWindowGetNextEdge();
-		System.out.println(timeStamp + ' ' + edgeTimeStamp);
+		//System.out.println(timeStamp + '\t' + edgeTimeStamp);
 		
 		if (timeStamp < edgeTimeStamp) {
 			if (!sliceDataMap.containsKey(channelCode)) {
@@ -81,9 +86,8 @@ public class SliceCalcBolt implements IRichBolt {
 			}
 		}
 		else {
-			System.out.println(channelCode);
 			AvgDataItem avgDataItem = sliceDataMap.get(channelCode);
-			System.out.println(avgDataItem);
+			//System.out.println(avgDataItem);
 			_collector.emit(new Values(channelCode, avgDataItem.getStartTime(),
 					timeStamp,
 					avgDataItem.getSum(), avgDataItem.getNum(),

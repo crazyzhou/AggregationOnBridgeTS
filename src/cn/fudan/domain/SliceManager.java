@@ -14,13 +14,13 @@ public class SliceManager {
 	}
 	
 	private void addEdges(long startTime, PairedWindow pairedWindows) {
-		H.add(new Edge(startTime + pairedWindows.getLeftSize(), pairedWindows, false));
+		if (pairedWindows.getLeftSize() != 0) 
+			H.add(new Edge(startTime + pairedWindows.getLeftSize(), pairedWindows, false));
 		H.add(new Edge(startTime + pairedWindows.getLeftSize() + pairedWindows.getRightSize(), pairedWindows, true));
 	}
 	
 	public long advanceWindowGetNextEdge() {
 		Edge curEdge;
-		System.out.println(H.size());
 		long curTime = H.peek().getCurrentTime();
 		while (curTime == H.peek().getCurrentTime()) {
 			curEdge = H.remove();
@@ -29,7 +29,6 @@ public class SliceManager {
 				addEdges(curEdge.getCurrentTime(), curEdge.getPairedWindows());
 			}
 		}
-		System.out.println(curTime);
 		return curTime;
 	}
 	

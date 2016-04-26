@@ -34,9 +34,7 @@ public class FilterBolt implements IRichBolt{
 		if (channelSet.contains(ChannelCode))
 		{
 			if (isFirst) {
-				System.out.println("I'm in it");
 				getQueryMap.setFirstTimestamp(timeStamp);
-				System.out.println(ChannelCode + '\t' + timeStamp);
 				isFirst = false;
 			}
 			_collector.emit(new Values(ChannelCode, timeStamp, value));

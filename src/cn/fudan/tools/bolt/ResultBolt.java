@@ -125,7 +125,7 @@ public class ResultBolt implements IRichBolt{
 		functionMap = getQueryMap.getFunctionMap();
 		for (ChannelWindow window : functionMap.keySet()) {
 			edgeTimeMap.put(window, firstTimestamp);
-			dataMap.put(window, new ArrayList<>());
+			dataMap.put(window, new ArrayList<AvgDataItem>());
 		}
 	}
 
@@ -139,6 +139,7 @@ public class ResultBolt implements IRichBolt{
 		float num = tuple.getFloatByField("num");
 		float max = tuple.getFloatByField("max");
 		float min = tuple.getFloatByField("min");
+		System.out.println(channelCode + '\t' + startTime + '\t' + endTime + '\t' + num);
 		for (ChannelWindow window : windowMap.get(channelCode)) {
 			long lastEdge = edgeTimeMap.get(window);
 			dataMap.get(window).add(new AvgDataItem(sum, num, max, min, startTime));
