@@ -10,22 +10,14 @@ import com.inet.tds.f;
 public class GetQueryMap {
 	private static Map<String, Set<ChannelWindow>> windowMap;
 	private static Map<ChannelWindow, Set<String>> functionMap;
-	private static long firstTimestamp;
+	private static Map<String, Long> firstTimestampMap;
 	
 	public GetQueryMap() {
 		windowMap = new HashMap<>();
 		functionMap = new HashMap<>();
-		firstTimestamp = 0;
+		firstTimestampMap = new HashMap<>();
 	}
-	
-	public long getFirstTimestamp() {
-		return firstTimestamp;
-	}
-	
-	public void setFirstTimestamp(long firstTimestamp) {
-		GetQueryMap.firstTimestamp = firstTimestamp;
-	}
-	
+
 	public Map<String, Set<ChannelWindow>> getWindowMap() {
 		return windowMap;
 	}
@@ -34,6 +26,10 @@ public class GetQueryMap {
 		return functionMap;
 	}
 	
+	public Map<String, Long> getFirstTimestampMap() {
+		return firstTimestampMap;
+	}
+
 	public void AddOneQuery(String channelCode, long windowSize, long moveSize, String functionName)
 	{
 		ChannelWindow channelWindow = new ChannelWindow(channelCode, windowSize, moveSize);

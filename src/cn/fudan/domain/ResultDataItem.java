@@ -16,6 +16,14 @@ public class ResultDataItem
 		this.moveSize = moveSize;
 	}
 	
+	public ResultDataItem(String functionName, ChannelWindow channelWindow)
+	{
+		this.functionName = functionName;
+		this.channelCode = channelWindow.getChannel();
+		this.windowSize = channelWindow.getWindowSize();
+		this.moveSize = channelWindow.getMoveSize();
+	}
+	
 	public String getFunctionName()
 	{
 		return functionName;

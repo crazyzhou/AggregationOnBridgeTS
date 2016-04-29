@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.juyee.health.stat.AVGMethod;
+
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
@@ -22,17 +24,16 @@ import cn.fudan.domain.ResultDataItem;
 import cn.fudan.tools.util.NewGenerate;
 
 public class ResultBolt implements IRichBolt{
+	boolean isFirst;
 	OutputCollector _collector;
 	Map<ResultDataItem, Map<Long, Float>> map;
-	long firstTimestamp;
 	Map<String, Set<ChannelWindow>> windowMap;
 	Map<ChannelWindow, Set<String>> functionMap;
 	Map<ChannelWindow, Long> edgeTimeMap;
-	Map<ChannelWindow, List<AvgDataItem>> dataMap;
+	Map<String, List<AvgDataItem>> dataMap;
 	
-	long maxSeconds;
-	long deleteStep;
-	long needDealSeconds;
+	static final long deleteThreshold = 1000 * 60 * 3; //3 min
+	long dealingSecond;
 	Interpreter interpreter;
 	
 	@Override
@@ -40,28 +41,29 @@ public class ResultBolt implements IRichBolt{
 	{
 	}
 	
-	public boolean canRun()
-	{
-		for (Map.Entry<ResultDataItem, Map<Long, Float>> entry : map.entrySet())
-		{
-			Map<Long, Float> value = entry.getValue();
-			Long minSeconds = null;
-			for (Map.Entry<Long, Float> entry1 : value.entrySet())
-			{
-				minSeconds = entry1.getKey();
-				break;
-			}
-			if (minSeconds != null)
-			{
-				for (long i = minSeconds; i <= maxSeconds - deleteStep; i += deleteStep)
-				{
-					if (value.containsKey(i))
-					{
-						value.remove(i);
+	private void cleanMemory(String dealingChannel, long curTimestamp) {
+		for (ChannelWindow channelWindow : windowMap.get(dealingChannel)) {
+			for (String func : functionMap.get(channelWindow)) {
+				ResultDataItem resultDataItem = new ResultDataItem(func, channelWindow);
+				Map<Long, Float> tmpMap = map.get(resultDataItem);
+				for (Map.Entry<Long, Float> entry : tmpMap.entrySet()) {
+					if (entry.getKey() + deleteThreshold < curTimestamp) {
+						tmpMap.remove(entry.getKey());
 					}
 				}
 			}
 		}
+		List<AvgDataItem> tmpList = dataMap.get(dealingChannel);
+		for (AvgDataItem avgDataItem : tmpList) {
+			if (avgDataItem.getStartTime() + deleteThreshold < curTimestamp) {
+				tmpList.remove(avgDataItem);
+			}
+		}
+	}
+	
+	private boolean canRun(String dealingChannel, long curTimestamp)
+	{
+		cleanMemory(dealingChannel, curTimestamp);
 		Set<Long> dealSeconds = new HashSet<Long>();
 		int count = 0;
 		for (Map.Entry<ResultDataItem, Map<Long, Float>> entry : map.entrySet())
@@ -95,7 +97,7 @@ public class ResultBolt implements IRichBolt{
 		}
 		for (Long l : dealSeconds)
 		{
-			needDealSeconds = l;
+			dealingSecond = l;
 		}
 		return true;
 	}
@@ -116,22 +118,31 @@ public class ResultBolt implements IRichBolt{
 			OutputCollector collector)
 	{
 		this._collector = collector;
-		GetQueryMap getQueryMap = NewGenerate.getQueryMap;
 		interpreter = new Interpreter();
 		edgeTimeMap = new HashMap<>();
 		dataMap = new HashMap<>();
-		firstTimestamp = getQueryMap.getFirstTimestamp();
-		windowMap = getQueryMap.getWindowMap();
-		functionMap = getQueryMap.getFunctionMap();
-		for (ChannelWindow window : functionMap.keySet()) {
-			edgeTimeMap.put(window, firstTimestamp);
-			dataMap.put(window, new ArrayList<AvgDataItem>());
-		}
+		map = new HashMap<>();
+		isFirst = true;
 	}
 
 	@Override
 	public void execute(Tuple tuple)
 	{
+		if (isFirst) {
+			GetQueryMap getQueryMap = NewGenerate.getQueryMap;
+			windowMap = getQueryMap.getWindowMap();
+			functionMap = getQueryMap.getFunctionMap();
+			Map<String, Long> firstTimestampMap = getQueryMap.getFirstTimestampMap();
+			for (ChannelWindow window : functionMap.keySet()) {
+				edgeTimeMap.put(window, firstTimestampMap.get(window.getChannel()));
+				if (!dataMap.containsKey(window.getChannel()))
+					dataMap.put(window.getChannel(), new ArrayList<AvgDataItem>());
+				for (String func : functionMap.get(window)) {
+					map.put(new ResultDataItem(func, window), new HashMap<Long, Float>());
+				}
+			}
+			isFirst = false;
+		}
 		String channelCode = tuple.getStringByField("channelCode");
 		long startTime = tuple.getLongByField("startTime");
 		long endTime = tuple.getLongByField("endTime");
@@ -139,17 +150,17 @@ public class ResultBolt implements IRichBolt{
 		float num = tuple.getFloatByField("num");
 		float max = tuple.getFloatByField("max");
 		float min = tuple.getFloatByField("min");
-		System.out.println(channelCode + '\t' + startTime + '\t' + endTime + '\t' + num);
+		//System.out.println(channelCode + '\t' + startTime + '\t' + endTime + '\t' + num);
 		for (ChannelWindow window : windowMap.get(channelCode)) {
 			long lastEdge = edgeTimeMap.get(window);
-			dataMap.get(window).add(new AvgDataItem(sum, num, max, min, startTime));
+			dataMap.get(channelCode).add(new AvgDataItem(sum, num, max, min, startTime));
 			edgeTimeMap.put(window, lastEdge + window.getMoveSize());
 			if (window.getWindowSize() + lastEdge <= endTime) {
 				float allnum = 0;
 				float allsum = 0;
 				float allmax = Float.MIN_VALUE;
 				float allmin = Float.MAX_VALUE;
-				for (AvgDataItem avgDataItem : dataMap.get(window)) {
+				for (AvgDataItem avgDataItem : dataMap.get(channelCode)) {
 					if (avgDataItem.getStartTime() > lastEdge) {
 						allnum += avgDataItem.getNum();
 						allsum += avgDataItem.getSum();
@@ -158,22 +169,21 @@ public class ResultBolt implements IRichBolt{
 					}
 				}
 				for (String functionName : functionMap.get(window)) {
-					ResultDataItem resultDataItem = new ResultDataItem(functionName,
-							channelCode, window.getWindowSize(), window.getMoveSize());
+					ResultDataItem resultDataItem = new ResultDataItem(functionName, window);
 					if (functionName.equals("avg"))
-						map.get(resultDataItem).put(startTime, allsum / allnum);
+						map.get(resultDataItem).put(lastEdge, allsum / allnum);
 					else if (functionName.equals("min"))
-						map.get(resultDataItem).put(startTime, allmin);
+						map.get(resultDataItem).put(lastEdge, allmin);
 					else if (functionName.equals("max"))
-						map.get(resultDataItem).put(startTime, allmax); 
+						map.get(resultDataItem).put(lastEdge, allmax);
 					else if (functionName.equals("sum"))
-						map.get(resultDataItem).put(startTime, allsum);
+						map.get(resultDataItem).put(lastEdge, allsum);
 				}
 				
 			}
 		}
 		
-		if (canRun())
+		if (canRun(channelCode, endTime))
 		{
 			try
 			{
@@ -222,11 +232,11 @@ public class ResultBolt implements IRichBolt{
 				for (Map.Entry<ResultDataItem, Map<Long, Float>> entry : map
 						.entrySet())
 				{
-					entry.getValue().remove(needDealSeconds);
+					entry.getValue().remove(dealingSecond);
 				}
 				for (String resultItem : NewGenerate.result)
 				{
-					System.out.println(resultItem + "在" + needDealSeconds
+					System.out.println(resultItem + "在" + dealingSecond
 							+ "秒钟结果为:" + interpreter.get(resultItem));
 				}
 			} catch (EvalError e)

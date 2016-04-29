@@ -47,24 +47,29 @@ public class SliceCalcBolt implements IRichBolt {
 	
 	@Override
 	public void execute(Tuple tuple) {
+		String channelCode = tuple.getStringByField("channelCode");
+		long timeStamp = tuple.getLongByField("timeStamp");
+		float value = tuple.getFloatByField("value");
 		if (isFirst) {
-			for (String channelCode : windowMap.keySet())
+			for (String channel : windowMap.keySet())
 			{
 				List<PairedWindow> pairedWindows = new ArrayList<>();
-				for (ChannelWindow window : windowMap.get(channelCode))
+				for (ChannelWindow window : windowMap.get(channel))
 				{
 					PairedWindow pairedWindow = new PairedWindow(window);
 					pairedWindows.add(pairedWindow);
 				}
-				sliceManagers.put(channelCode, new SliceManager(pairedWindows, getQueryMap.getFirstTimestamp()));
+				if (getQueryMap.getFirstTimestampMap().get(channel) == null) {
+					sliceManagers.put(channel, new SliceManager(pairedWindows, timeStamp));
+					getQueryMap.getFirstTimestampMap().put(channel, timeStamp);
+				}
+				else 
+					sliceManagers.put(channel, new SliceManager(pairedWindows, getQueryMap.getFirstTimestampMap().get(channel)));
 			}
 			isFirst = false;
 		}
-		String channelCode = tuple.getStringByField("channelCode");
-		long timeStamp = tuple.getLongByField("timeStamp");
-		float value = tuple.getFloatByField("value");
-		long edgeTimeStamp = sliceManagers.get(channelCode).advanceWindowGetNextEdge();
-		//System.out.println(timeStamp + '\t' + edgeTimeStamp);
+		long edgeTimeStamp = sliceManagers.get(channelCode).advanceWindowGetNextEdge(timeStamp);
+		//System.out.println(timeStamp + "\t" + channelCode + "\t" + edgeTimeStamp);
 		
 		if (timeStamp < edgeTimeStamp) {
 			if (!sliceDataMap.containsKey(channelCode)) {
@@ -87,12 +92,11 @@ public class SliceCalcBolt implements IRichBolt {
 		}
 		else {
 			AvgDataItem avgDataItem = sliceDataMap.get(channelCode);
-			//System.out.println(avgDataItem);
+			//System.out.println(avgDataItem.getStartTime() + "\t" + timeStamp + "\t" + avgDataItem.getNum());
 			_collector.emit(new Values(channelCode, avgDataItem.getStartTime(),
 					timeStamp,
 					avgDataItem.getSum(), avgDataItem.getNum(),
 					avgDataItem.getMax(), avgDataItem.getMin()));
-			sliceDataMap.remove(channelCode);
 		}
 	}
 

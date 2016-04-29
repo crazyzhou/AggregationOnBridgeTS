@@ -1,5 +1,6 @@
 package cn.fudan.tools.bolt;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +17,7 @@ import cn.fudan.tools.util.NewGenerate;
 public class FilterBolt implements IRichBolt{
 	OutputCollector _collector;
 	Set<String> channelSet;
-	boolean isFirst;
+	Map<String, Boolean> isFirstMap;
 	GetQueryMap getQueryMap;
 
 	@Override
@@ -33,9 +34,9 @@ public class FilterBolt implements IRichBolt{
 		//System.out.println(ChannelCode + '\t' + timeStamp);
 		if (channelSet.contains(ChannelCode))
 		{
-			if (isFirst) {
-				getQueryMap.setFirstTimestamp(timeStamp);
-				isFirst = false;
+			if (isFirstMap.get(ChannelCode)) {
+				getQueryMap.getFirstTimestampMap().put(ChannelCode, timeStamp);
+				isFirstMap.put(ChannelCode, false);
 			}
 			_collector.emit(new Values(ChannelCode, timeStamp, value));
 		}
@@ -53,8 +54,11 @@ public class FilterBolt implements IRichBolt{
 	{
 		this._collector = collector;
 		getQueryMap = NewGenerate.getQueryMap;
-		isFirst = true;
+		isFirstMap = new HashMap<>();
 		channelSet = getQueryMap.getWindowMap().keySet();
+		for (String channel : channelSet) {
+			isFirstMap.put(channel, true);
+		}
 	}
 
 	@Override
