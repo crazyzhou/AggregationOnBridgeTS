@@ -1,0 +1,8 @@
+out_MD471Z=avg("5AB001-DY",5000,1000);
+out_MD472Z=max("5AB002-DY",5000,1000);
+out_MD473Z=min("5AB003-DY",5000,1000);
+out_MD474Z=sum("5AB004-DY",5000,1000);
+double[] max={out_MD471Z,out_MD472Z,out_MD473Z,out_MD474Z};
+java.util.Arrays.sort(max);
+out_MD471474_MZ=max[max.length-1];
+out_MD471474_AZ=(out_MD471Z+out_MD472Z+out_MD473Z+out_MD474Z)/4;
