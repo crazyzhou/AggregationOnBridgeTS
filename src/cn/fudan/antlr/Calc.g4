@@ -5,7 +5,9 @@ goal
 	
 expression
 	:	windowExpression
-	|	calcExpression;
+	|	calcExpression
+	|	combExpression
+	|	arrayExpression;
 
 windowExpression
 	:	Identifier '=' function '("' Channel '"' ',' Integer ',' Integer ')';
@@ -35,10 +37,25 @@ multiplicativeExpression
 parenthesisExpression
 	:	'(' additiveExpression ')'
 	|	Identifier
-	|	Integer;
+	|	Integer
+	|	Float;
+
+combExpression
+	:	Identifier '=' 'combine(' (Identifier ',')* Identifier ')';
+
+arrayExpression
+	:	Identifier '=' arrayFunction '(' Identifier ')';
+	
+arrayFunction
+	:	'arrayMax'
+	|	'arrayAvg';
 	
 Integer
-	:	NonZeroDigit DIGIT*;
+	:	'0'
+	|	NonZeroDigit DIGIT*;
+
+Float
+	:	 Integer '.' DIGIT*;
 
 Identifier
 	:	OutIdentifier
