@@ -1,18 +1,9 @@
 package cn.fudan.antlr;
 
-import org.antlr.runtime.tree.TreeParser;
-import org.antlr.runtime.tree.TreeVisitor;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.antlr.v4.runtime.tree.RuleNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.antlr.v4.runtime.tree.gui.TreeViewer;
-import org.stringtemplate.v4.compiler.STParser.namedArg_return;
 
-import com.inet.pool.l;
 
 public class TreeConstructor {
 	
@@ -40,6 +31,9 @@ public class TreeConstructor {
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		CalcParser parser = new CalcParser(tokens);
 		ParseTree tree = parser.goal();
+		// TODO: Tree get.
+				// plan 1: use the original ParseTree to do the next step
+				// plan 2: use walker & walk() to construct a simpler AST.
 		for (int i=0; i<tree.getChildCount(); i+=2) {
 			String tmpString = tree.getChild(i).getText();
 			if (tmpString.contains("max(") ||
