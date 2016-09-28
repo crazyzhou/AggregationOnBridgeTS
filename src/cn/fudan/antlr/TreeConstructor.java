@@ -1,16 +1,43 @@
 package cn.fudan.antlr;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import cn.fudan.domain.*;
+
 
 public class TreeConstructor {
 	
+	private static Map<String, CalcTreeNode> map = new HashMap<>();
+	
 	private static void process_base(ParseTree tree) {
 		tree = tree.getChild(0);
+		CalcTreeNode node = new CalcTreeNode(
+				tree.getChild(0).getText(),
+				tree.getChild(2).getText(),
+				tree.getChild(4).getText(),
+				Long.parseLong(tree.getChild(7).getText()),
+				Long.parseLong(tree.getChild(9).getText()));
+		map.put(tree.getChild(0).getText(), node);
+	}
+	
+	private static void process_upper(ParseTree tree) {
+		tree = tree.getChild(0);
+		CalcTreeNode node = new CalcTreeNode(
+				tree.getChild(0).getText(),
+				tree.getChild(2).getText(),
+				tree.getChild(4).getText(),
+				Long.parseLong(tree.getChild(7).getText()),
+				Long.parseLong(tree.getChild(9).getText()));
 		for (int i=0; i < tree.getChildCount(); i++) {
-			System.out.println(tree.getChild(i).getText());
+			ParseTree tmpTree = tree.getChild(i);
+			if (map.containsKey(tmpTree.getText())) {
+				
+			}
 		}
 	}
 	
@@ -31,16 +58,16 @@ public class TreeConstructor {
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		CalcParser parser = new CalcParser(tokens);
 		ParseTree tree = parser.goal();
-		// TODO: Tree get.
-				// plan 1: use the original ParseTree to do the next step
-				// plan 2: use walker & walk() to construct a simpler AST.
 		for (int i=0; i<tree.getChildCount(); i+=2) {
 			String tmpString = tree.getChild(i).getText();
-			if (tmpString.contains("max(") ||
-					tmpString.contains("min(") ||
-					tmpString.contains("avg(") ||
-					tmpString.contains("sum(")) {
+			if (tmpString.contains("=max(") ||
+					tmpString.contains("=min(") ||
+					tmpString.contains("=avg(") ||
+					tmpString.contains("=sum(")) {
 				process_base(tree.getChild(i));
+			}
+			else {
+				process_upper(tree.getChild(i));
 			}
 		}
 	}
