@@ -15,6 +15,10 @@ public class CalcTreeNode {
 		this.value = new ResultDataItem(functionName, channelCode, windowSize, moveSize);
 		this.children = new ArrayList<CalcTreeNode>();
 	}
+	
+	public CalcTreeNode(String varName) {
+		this.varName = varName;
+	}
 
 	public String getVarName() {
 		return varName;

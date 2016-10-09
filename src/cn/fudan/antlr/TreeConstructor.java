@@ -36,9 +36,10 @@ public class TreeConstructor {
 		for (int i=0; i < tree.getChildCount(); i++) {
 			ParseTree tmpTree = tree.getChild(i);
 			if (map.containsKey(tmpTree.getText())) {
-				
+				node.addChild(map.get(tmpTree.getText()));
 			}
 		}
+		map.put(tree.getChild(0).getText(), node);
 	}
 	
 	public static void main(String[] args) {
@@ -60,6 +61,7 @@ public class TreeConstructor {
 		ParseTree tree = parser.goal();
 		for (int i=0; i<tree.getChildCount(); i+=2) {
 			String tmpString = tree.getChild(i).getText();
+//			System.out.println(tmpString);
 			if (tmpString.contains("=max(") ||
 					tmpString.contains("=min(") ||
 					tmpString.contains("=avg(") ||
@@ -69,6 +71,7 @@ public class TreeConstructor {
 			else {
 				process_upper(tree.getChild(i));
 			}
+			System.out.println(map.size());
 		}
 	}
 }
