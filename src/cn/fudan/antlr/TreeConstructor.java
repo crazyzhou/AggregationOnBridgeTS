@@ -28,15 +28,18 @@ public class TreeConstructor {
 	private static void process_upper(ParseTree tree) {
 		tree = tree.getChild(0);
 		CalcTreeNode node = new CalcTreeNode(
-				tree.getChild(0).getText(),
-				tree.getChild(2).getText(),
-				tree.getChild(4).getText(),
-				Long.parseLong(tree.getChild(7).getText()),
-				Long.parseLong(tree.getChild(9).getText()));
-		for (int i=0; i < tree.getChildCount(); i++) {
+				tree.getChild(0).getText());
+		if () {
+			
+		}
+		
+		
+		for (int i=1; i < tree.getChildCount(); i++) {
 			ParseTree tmpTree = tree.getChild(i);
+			System.out.println(tmpTree.getText());
 			if (map.containsKey(tmpTree.getText())) {
 				node.addChild(map.get(tmpTree.getText()));
+				map.get(tmpTree.getText()).setParent(node);
 			}
 		}
 		map.put(tree.getChild(0).getText(), node);
@@ -73,5 +76,8 @@ public class TreeConstructor {
 			}
 			System.out.println(map.size());
 		}
+		for (String s : map.keySet())
+//			System.out.println(map.get(s).getChildrenNum());
+		System.out.println(map.get("out_MD471474_AZ").getChildrenNum());
 	}
 }

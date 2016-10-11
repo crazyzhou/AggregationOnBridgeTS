@@ -18,6 +18,7 @@ public class CalcTreeNode {
 	
 	public CalcTreeNode(String varName) {
 		this.varName = varName;
+		this.children = new ArrayList<CalcTreeNode>();
 	}
 
 	public String getVarName() {
@@ -34,6 +35,10 @@ public class CalcTreeNode {
 
 	public void setParent(CalcTreeNode parent) {
 		this.parent = parent;
+	}
+	
+	public int getChildrenNum() {
+		return this.children.size();
 	}
 	
 	public void addChild(CalcTreeNode child) {
