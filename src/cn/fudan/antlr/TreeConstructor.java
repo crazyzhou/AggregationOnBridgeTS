@@ -1,7 +1,10 @@
 package cn.fudan.antlr;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -29,17 +32,19 @@ public class TreeConstructor {
 		tree = tree.getChild(0);
 		CalcTreeNode node = new CalcTreeNode(
 				tree.getChild(0).getText());
-		if () {
-			
-		}
-		
-		
-		for (int i=1; i < tree.getChildCount(); i++) {
-			ParseTree tmpTree = tree.getChild(i);
-			System.out.println(tmpTree.getText());
-			if (map.containsKey(tmpTree.getText())) {
-				node.addChild(map.get(tmpTree.getText()));
-				map.get(tmpTree.getText()).setParent(node);
+		// 层次遍历
+		Queue<ParseTree> queue = new LinkedList<ParseTree>();
+		queue.offer(tree);
+		while (!queue.isEmpty()) {
+			ParseTree tmpTree = queue.poll();
+			if (tmpTree.getChildCount() == 0)
+				if (map.containsKey(tmpTree.getText())) {
+					System.out.println(tmpTree.getText());
+					node.addChild(map.get(tmpTree.getText()));
+					map.get(tmpTree.getText()).setParent(node);
+				}
+			for (int i=0; i<tmpTree.getChildCount(); i++) {
+				queue.offer(tmpTree.getChild(i));
 			}
 		}
 		map.put(tree.getChild(0).getText(), node);
@@ -76,7 +81,6 @@ public class TreeConstructor {
 			}
 			System.out.println(map.size());
 		}
-		for (String s : map.keySet())
 //			System.out.println(map.get(s).getChildrenNum());
 		System.out.println(map.get("out_MD471474_AZ").getChildrenNum());
 	}
