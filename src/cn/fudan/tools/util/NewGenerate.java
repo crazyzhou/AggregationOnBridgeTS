@@ -7,20 +7,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.jdbc.core.ResultSetExtractor;
-
 import bsh.Interpreter;
 import cn.fudan.domain.GetQueryMap;
 import cn.fudan.tools.util.StringHelp;
 
 public class NewGenerate
 {
-	public static Set<String> result;
+	public Set<String> result;
 	public static GetQueryMap getQueryMap;
 	
 	public static void main(String[] args) throws Exception
 	{
-		NewGenerate.generate("out_MD471Z=avg(\"5AB001-DY\",5000,1000);\n" +
+		generate("out_MD471Z=avg(\"5AB001-DY\",5000,1000);\n" +
 
 		"out_MD472Z=max(\"5AB002-DY\",5000,1000);\n" +
 
@@ -37,7 +35,7 @@ public class NewGenerate
 		"out_MD471474_AZ=(out_MD471Z+out_MD472Z+out_MD473Z+out_MD474Z)/4;");
 	}
 	
-	public static void generate(String expression) throws Exception
+	public void generate(String expression) throws Exception
 	{
 		result = new HashSet<>();
 		getQueryMap = new GetQueryMap();
