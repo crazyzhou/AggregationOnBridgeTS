@@ -13,11 +13,12 @@ import cn.fudan.tools.util.StringHelp;
 
 public class NewGenerate
 {
-	public Set<String> result;
+	public static Set<String> result;
 	public static GetQueryMap getQueryMap;
 	
 	public static void main(String[] args) throws Exception
 	{
+		/*
 		generate("out_MD471Z=avg(\"5AB001-DY\",5000,1000);\n" +
 
 		"out_MD472Z=max(\"5AB002-DY\",5000,1000);\n" +
@@ -33,12 +34,15 @@ public class NewGenerate
 		"out_MD471474_MZ=max[max.length-1];\n" +
 
 		"out_MD471474_AZ=(out_MD471Z+out_MD472Z+out_MD473Z+out_MD474Z)/4;");
+		*/
 	}
 	
-	public void generate(String expression) throws Exception
+	public static void generate(String expression, int num) throws Exception
 	{
-		result = new HashSet<>();
-		getQueryMap = new GetQueryMap();
+		if (result == null || result.isEmpty())
+			result = new HashSet<>();
+		if (getQueryMap == null)
+			getQueryMap = new GetQueryMap();
 		String[] ss = expression.split(";");
 		for (int i = 0; i < ss.length; i++)
 		{
@@ -54,11 +58,17 @@ public class NewGenerate
 		Method[] methods = getAllStatMethods();
 		sb.append("import cn.fudan.tools.util.*;\n");
 		sb.append("import cn.fudan.domain.*;\n");
+		sb.append("private static final int num = " + num + ";\n");
 		for (int i = 0; i < methods.length; i++)
 		{
 			String s = "private {0} {1}(String channel,long windowSize, long moveSize)\n"
 					+ "'{'\n"
 					+ "    NewGenerate.{1}(channel,windowSize,moveSize);\n"
+					+ "    if (getQueryMap.getGroupingMap().containsKey(channel)) {\n"
+					+ "    getQueryMap.getGroupingMap().get(channel).add(num);\n"
+					+ "    } else {\n"
+					+ "        getQueryMap.getGroupingMap().put(channel, new HashSet<Integer>(){{add(num);}});\n"
+					+ "    }"
 					+ "    return 0;\n" + "'}'";
 			Method method = methods[i];
 			s = StringHelp.format(s, new String[] {
@@ -69,7 +79,7 @@ public class NewGenerate
 		System.out.println(sb.toString());
 		interpreter.eval(sb.toString());
 	}
-
+	
 	public static Method[] getAllStatMethods()
 	{
 		Method[] methods = NewGenerate.class.getMethods();

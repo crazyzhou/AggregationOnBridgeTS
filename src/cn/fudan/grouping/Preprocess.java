@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import cn.fudan.domain.GetQueryMap;
 import cn.fudan.tools.util.NewGenerate;
 
 public class Preprocess {
@@ -17,6 +18,7 @@ public class Preprocess {
 		if (directory.isDirectory()) {
 			 File[] list = directory.listFiles();
 			 sList = new ArrayList<>();
+			 int count = 0;
 			 for (File file : list) {
 				 try {
 					 StringBuilder sb = new StringBuilder();
@@ -27,9 +29,9 @@ public class Preprocess {
 					 }
 					 br.close();
 					 sList.add(sb.toString());
-					 NewGenerate gen = new NewGenerate();
-					 gen.generate(sb.toString());
-					 
+					 NewGenerate.generate(sb.toString(), count);
+					 GetQueryMap getQueryMap = NewGenerate.getQueryMap;
+					 count++;
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
