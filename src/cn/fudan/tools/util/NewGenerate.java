@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import bsh.EvalError;
 import bsh.Interpreter;
 import cn.fudan.domain.GetQueryMap;
 import cn.fudan.tools.util.StringHelp;
@@ -37,7 +38,7 @@ public class NewGenerate
 		*/
 	}
 	
-	public static void generate(String expression, int num) throws Exception
+	public static int generate(String expression, int num)
 	{
 		if (result == null || result.isEmpty())
 			result = new HashSet<>();
@@ -59,10 +60,12 @@ public class NewGenerate
 		sb.append("import cn.fudan.tools.util.*;\n");
 		sb.append("import cn.fudan.domain.*;\n");
 		sb.append("private static final int num = " + num + ";\n");
+		sb.append("private static int calcCount = 0;\n");
 		for (int i = 0; i < methods.length; i++)
 		{
 			String s = "private {0} {1}(String channel,long windowSize, long moveSize)\n"
 					+ "'{'\n"
+					+ "    calcCount++;\n"
 					+ "    NewGenerate.{1}(channel,windowSize,moveSize);\n"
 					+ "    if (getQueryMap.getGroupingMap().containsKey(channel)) {\n"
 					+ "    getQueryMap.getGroupingMap().get(channel).add(num);\n"
@@ -77,7 +80,14 @@ public class NewGenerate
 		}
 		sb.append(expression);
 		System.out.println(sb.toString());
-		interpreter.eval(sb.toString());
+		try {
+			interpreter.eval(sb.toString());
+			return (int) interpreter.get("calcCount");
+		} catch (EvalError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
 	}
 	
 	public static Method[] getAllStatMethods()

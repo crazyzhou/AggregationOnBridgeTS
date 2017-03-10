@@ -21,6 +21,7 @@ import cn.fudan.tools.util.NewGenerate;
 
 public class NewTopology
 {
+	public static final int WORKER_NUM = 6;
 	public static void main(String[] args) throws Exception, InvalidTopologyException
 	{
 		NewGenerate.main(args);
@@ -40,7 +41,7 @@ public class NewTopology
 
 		if (args != null && args.length > 0)
 		{
-			conf.setNumWorkers(6);
+			conf.setNumWorkers(WORKER_NUM);
 
 			StormSubmitter.submitTopology(args[0], conf,
 					builder.createTopology());// readStormConfig(首先读取的是defaults.yaml下的配置，然后读取storm.conf.file这个变量（有可能读取不到任何东西，这个变量下存储的是一个文件的名字），如果为空就读取storm.yaml，否则读取这个文件下的配置，最后读取storm.options）
