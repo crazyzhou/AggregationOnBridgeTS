@@ -20,9 +20,9 @@ public class Preprocess {
 
 	private ArrayList<String> sList;
 	private ArrayList<Integer> worker = new ArrayList<>(NewTopology.WORKER_NUM);
-	private ArrayList<Set<Integer>> assignment = new ArrayList<>(NewTopology.WORKER_NUM);
+	private Map<Integer, Integer> assignment = new HashMap<>();
 
-	public ArrayList<Set<Integer>> getAssignment() {
+	public Map<Integer, Integer> getAssignment() {
 		return assignment;
 	}
 
@@ -70,8 +70,6 @@ public class Preprocess {
 			}
 		}
 		//distribute channelId to different tasks by descending cost
-		for (int i = 0; i < NewTopology.WORKER_NUM; i++)
-			assignment.add(new HashSet<Integer>());
 		List<Map.Entry<Integer, Integer>> list = new ArrayList<Map.Entry<Integer, Integer>>(costMap.entrySet());
 		Collections.sort(list, new Comparator<Map.Entry<Integer, Integer>>() {
 			@Override
@@ -82,7 +80,7 @@ public class Preprocess {
 
 		for (int i = 0; i < costMap.size(); i++) {
 			int k = findIndexOfMin(worker);
-			assignment.get(k).add(i); // Assign query i to worker k
+			assignment.put(i, k); // Assign query i to worker k
 			worker.set(k, worker.get(k) + costMap.get(i));
 		}
 	}
