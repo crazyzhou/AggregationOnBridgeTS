@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.tuple.Tuple;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.tuple.Tuple;
 import bsh.EvalError;
 import bsh.Interpreter;
 import cn.fudan.domain.ResultDataItem;
@@ -123,15 +123,15 @@ public class GetResultFunction
 				+ "\n"
 				+
 
-				"import backtype.storm.task.OutputCollector;"
+				"import org.apache.storm.task.OutputCollector;"
 				+ "\n"
-				+ "import backtype.storm.task.TopologyContext;"
+				+ "import org.apache.storm.task.TopologyContext;"
 				+ "\n"
-				+ "import backtype.storm.topology.IRichBolt;"
+				+ "import org.apache.storm.topology.IRichBolt;"
 				+ "\n"
-				+ "import backtype.storm.topology.OutputFieldsDeclarer;"
+				+ "import org.apache.storm.topology.OutputFieldsDeclarer;"
 				+ "\n"
-				+ "import backtype.storm.tuple.Tuple;"
+				+ "import org.apache.storm.tuple.Tuple;"
 				+ "\n"
 				+ "import bsh.EvalError;"
 				+ "\n"

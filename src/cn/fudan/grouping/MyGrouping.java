@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import backtype.storm.generated.GlobalStreamId;
-import backtype.storm.grouping.CustomStreamGrouping;
-import backtype.storm.task.WorkerTopologyContext;
+import org.apache.storm.generated.GlobalStreamId;
+import org.apache.storm.grouping.CustomStreamGrouping;
+import org.apache.storm.task.WorkerTopologyContext; 
 import cn.fudan.domain.GetQueryMap;
 import cn.fudan.tools.util.NewGenerate;
+
 public class MyGrouping implements CustomStreamGrouping {
 
 	GetQueryMap getQueryMap;

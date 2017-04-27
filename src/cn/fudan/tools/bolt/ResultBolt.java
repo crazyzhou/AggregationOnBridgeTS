@@ -8,13 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.juyee.health.stat.AVGMethod;
-
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.IRichBolt;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.tuple.Tuple;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.IRichBolt;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.tuple.Tuple;
 import bsh.EvalError;
 import bsh.Interpreter;
 import cn.fudan.domain.AvgDataItem;

@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.inet.tds.f;
-
 public class GetQueryMap {
 	private static Map<String, Set<ChannelWindow>> windowMap;
 	private static Map<ChannelWindow, Set<String>> functionMap;
